@@ -6,8 +6,8 @@
 
 ``` pip install numpy   ```
 
-Once you install numpy, You are good to go
-``` python DecisionTree.py ```
+Once you install numpy, You are good to go <br>
+``` python DecisionTree.py ``` <br>
 Run the above command in terminal inside the directory of DecisionTree.py
 
 ### Code Breakdown 
