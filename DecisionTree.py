@@ -6,6 +6,8 @@ X = np.array([
 ])
 Y = np.array([1, 0, 1, 0, 1, 1, 0, 0, 1, 0])  
 
+# print(X[1])
+
 class DecisionTree:
     def __init__(self,x,y):
         self.x=x
@@ -46,15 +48,17 @@ class DecisionTree:
     def calculate_best_gini(self,index):
         x_unique=np.unique(np.sort(self.x[index]))
         best_gini=float('inf')
+        
         best_threshold=None
         for i,threshold in enumerate(x_unique):
             left,right=self.grow_tree(index,threshold)
-            print(f'\n iteration:{i} \n left:{left} \n  right:{right}\n')
+            # print(f'\n iteration:{i} \n left:{left} \n  right:{right}\n')
             gini=self._calculate_gini(left,right)
             if gini<best_gini:
                 best_gini=gini
                 best_threshold=threshold
-        return best_threshold,best_gini
+               
+        return best_threshold,best_gini ,index
             
             
             
@@ -68,9 +72,23 @@ class DecisionTree:
 
 #creating object
 obj=DecisionTree(X,Y)
-print(f'best threshold and best gini :{obj.calculate_best_gini(0)}')
+
+def find_best_Gini_Threshold_all():
+    best_gini_all=float("inf")
+    best_threshold_all=None
+    index=None
+    feature=None
+    for i in range(X.shape[0]):
+        best_threshold_all_calc,best_gini_all_calc ,index=obj.calculate_best_gini(i)
+        if best_gini_all_calc<best_gini_all:
+            best_gini_all=best_gini_all_calc
+            best_threshold_all=best_threshold_all_calc
+            feature=index
             
+            
+    print(f"best gini all : {best_gini_all} and best threshold all : {best_threshold_all} from feature :{feature}")
+                    
         
-    
+find_best_Gini_Threshold_all()
     
         
