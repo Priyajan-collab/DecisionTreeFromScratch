@@ -16,7 +16,7 @@ class DecisionTree:
         self.original_Y=self.y
     
         
-        pass
+        
     
     def split_tree(self,index,threshold):
         self.left_indices=self.x[index]<=threshold
