@@ -12,26 +12,30 @@ class DecisionTree:
     def __init__(self,x,y):
         self.x=x
         self.y=y
-        self.original_X=self.x
-        self.original_Y=self.y
+        self.prev_X=None
+        self.prev_Y=None
+        self.l_1=[]
+        self.l_0=[]
     
         
         
     
     def split_tree(self,index,threshold):
+        
         self.left_indices=self.x[index]<=threshold
         self.right_indices=self.x[index]>threshold
-        left=self.x[index,self.left_indices]
-        right=self.x[index,self.right_indices]
+        self.left=self.x[index,self.left_indices]
+        self.right=self.x[index,self.right_indices]
         
-        return left,right
+        
+        return self.left,self.right
     
     def _calculate_gini(self,l_arr,R_arr):
         total_items=len(self.y)
         total_items_left=len(l_arr)
         total_items_right=len(R_arr)
-        target_val_left= len([np.array(self.y[self.left_indices]) for x in (self.y[self.left_indices]) if x>0]) #basically flexing my numpy skills, first i am shrinking y such that it is equivalent to x and then i am checking for y >1 then i am counting it
-        target_val_right=len([np.array(self.y[self.right_indices]) for x in (self.y[self.right_indices]) if x>0]) # I truly hope there's better way to do this
+        target_val_left = np.sum(self.y[self.left_indices] > 0) #basically flexing my numpy skills, first i am shrinking y such that it is equivalent to x and then i am checking for y >1 then i am counting it
+        target_val_right = np.sum(self.y[self.right_indices] > 0) # I truly hope there's better way to do this
         
         #calculating the probability in each tree
         pt_l=total_items_left /total_items
@@ -75,33 +79,77 @@ class DecisionTree:
                 self.best_gini_all=best_gini_all_calc
                 self.best_threshold_all=best_threshold_all_calc
                 self.feature=index
-            
+        self.l_0.append(self.left.tolist())
+        self.l_1.append(self.right.tolist())
             
         print(f"best gini all : {self.best_gini_all} and best threshold all : {self.best_threshold_all} from feature :{self.feature}")
         return self.best_threshold_all,self.feature,self.best_gini_all
     
     # divide left or right branches into sub branches
     def _grow_branch(self,indices):
-        self.x=self.original_X[:,indices]
-        self.y=self.original_Y[indices]
-        print(self.x, self.y)
-        new_threshold,new_index,self.best_gini_all=self.find_best_Gini_Threshold_all()
-        best_left,best_right=self.split_tree(new_index,new_threshold)
-        print(self.y[self.right_indices],self.y[self.left_indices])
-        if self.best_gini_all!=0:
-            self.grow_tree()
+        
+        self.prev_X=self.x
+        self.prev_Y=self.y
+        print(f"indices{indices} and x:{self.x}")
+        if  self.x.shape[1]==1:
+            print("it has ended")
+            return
+        self.x=self.prev_X[:,indices]
+        self.y=self.prev_Y[indices]
+        # print(self.x, self.y)
+        # new_threshold,new_index,self.best_gini_all=self.find_best_Gini_Threshold_all()
+        # best_left,best_right=self.split_tree(new_index,new_threshold)
+        # print(self.y[self.right_indices],self.y[self.left_indices])
         
         
-        
+    
     
     def grow_tree(self):
         self.find_best_Gini_Threshold_all()
         best_left,best_right=self.split_tree(self.feature,self.best_threshold_all)
-        # print(self.right_indices,self.left_indices)
+        print(self.right_indices,self.left_indices)
         self._grow_branch(self.left_indices)
+        if self.best_gini_all!=0:
+            DecisionTree(self.x,self.y)
+        self._grow_branch(self.right_indices)
+     
+    
+    def show_tree(self):
+        print(f"best split : for left: {self.l_0} \n ")
+        print(f" for ones for right: {self.l_1}")
+        return self.l_0,self.l_1
+                
         
     
-        
+class TreeNode:
+    def __init__(self, value):
+        self.value = value
+        self.left = None
+        self.right = None
+
+
+def build_tree(left_splits, right_splits, depth=0):
+    if depth >= len(left_splits):
+        return None
+    
+    node_value = left_splits[depth][0] if left_splits[depth] else None
+    node = TreeNode(node_value)
+    
+    if left_splits[depth]:
+        node.left = build_tree(left_splits, right_splits, depth + 1)
+    if right_splits[depth]:
+        node.right = build_tree(left_splits, right_splits, depth + 1)
+    
+    return node
+
+
+def print_tree(node, level=0, side='root'):
+    if node is not None:
+        print('  ' * level + f"{side}: {node.value}")
+        print_tree(node.left, level + 1, 'L')
+        print_tree(node.right, level + 1, 'R')
+
+     
         
         
 
@@ -111,5 +159,10 @@ class DecisionTree:
 
 #creating object
 obj=DecisionTree(X,Y)
-obj.grow_tree()
-        
+obj._grow_branch()
+left_splits,right_splits=obj.show_tree()
+
+
+
+root = build_tree(left_splits, right_splits)
+print_tree(root)   
