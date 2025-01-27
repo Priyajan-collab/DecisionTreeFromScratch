@@ -14,7 +14,7 @@ class DecisionTree:
         self.y=y
     
         
-        pass
+        
     
     def grow_tree(self,index,threshold):
         self.left_indices=self.x[index]<=threshold
