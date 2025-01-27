@@ -15,10 +15,14 @@ class DecisionTree:
         self.original_X=self.x
         self.original_Y=self.y
     
+<<<<<<< Updated upstream
         
         
     
     def split_tree(self,index,threshold):
+=======
+    def grow_tree(self,index,threshold):
+>>>>>>> Stashed changes
         self.left_indices=self.x[index]<=threshold
         self.right_indices=self.x[index]>threshold
         left=self.x[index,self.left_indices]
