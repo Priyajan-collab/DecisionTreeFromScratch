@@ -3,7 +3,7 @@ import numpy as np
 X = np.array([
     [3, 1, 4, 2, 5, 6, 7, 8, 9, 10],  
     [2.5, 1.0, 3.2, 2.8, 4.5, 5.6, 6.1, 7.3, 8.0, 9.1],
-    [2.5, 1.0, 3.2, 12.8, 4.9, 2.0006, 6.8, 7.3, 20.0, 9.1],  
+    [2.5, 23.0, 17.2, 15.8, 4.9, 2.200, 6.8, 7.3, 19.0, 1.0],  
       
 ])
 Y = np.array([1, 0, 1, 0, 1, 1, 0, 0, 1, 0])  
@@ -12,23 +12,16 @@ class DecisionTree:
     def __init__(self,x,y):
         self.x=x
         self.y=y
-        self.prev_X=None
-        self.prev_Y=None
         self.l_1=[]
-        self.l_0=[]
-    
-        
-        
-    
+        self.l_0=[]       
     def split_tree(self,index,threshold):
-        
+        """ this is to split the array into two branch, if it's greater it goes on right ndarray otherwise left ndarray"""
         self.left_indices=self.x[index]<=threshold
         self.right_indices=self.x[index]>threshold
-        self.left=self.x[index,self.left_indices]
-        self.right=self.x[index,self.right_indices]
-        
-        
-        return self.left,self.right
+        left=self.x[index,self.left_indices]
+        right=self.x[index,self.right_indices]
+     
+        return left,right
     
     def _calculate_gini(self,l_arr,R_arr):
         total_items=len(self.y)
@@ -55,7 +48,8 @@ class DecisionTree:
     def calculate_best_gini(self,index):
         x_unique=np.unique(np.sort(self.x[index]))
         best_gini=float('inf')
-        
+        best_left=None
+        best_right=None
         best_threshold=None
         for i,threshold in enumerate(x_unique):
             left,right=self.split_tree(index,threshold)
@@ -64,54 +58,46 @@ class DecisionTree:
             if gini<best_gini:
                 best_gini=gini
                 best_threshold=threshold
-               
-        return best_threshold,best_gini ,index
+                best_left=left
+                best_right=right
+        
+        return best_threshold,best_gini ,index,best_left, best_right
                             
     def find_best_Gini_Threshold_all(self):
         self.best_gini_all=float("inf")
         self.best_threshold_all=None
         index=None
         self.feature=None
+        self.split_left=None
+        self.split_right=None
+        
         
         for i in range(self.x.shape[0]):
-            best_threshold_all_calc,best_gini_all_calc ,index=self.calculate_best_gini(i)
+            best_threshold_all_calc,best_gini_all_calc ,index,left,right=self.calculate_best_gini(i)
             if best_gini_all_calc<self.best_gini_all:
                 self.best_gini_all=best_gini_all_calc
                 self.best_threshold_all=best_threshold_all_calc
                 self.feature=index
-        self.l_0.append(self.left.tolist())
-        self.l_1.append(self.right.tolist())
+                self.split_left=left
+                self.split_right=right
             
-        print(f"best gini all : {self.best_gini_all} and best threshold all : {self.best_threshold_all} from feature :{self.feature}")
-        return self.best_threshold_all,self.feature,self.best_gini_all
+        print(f"best gini all : {self.best_gini_all} and best threshold all : {self.best_threshold_all} from feature :{self.feature} with {self.split_left} and with  \t {self.split_right}")
+        return self.best_threshold_all,self.feature,self.best_gini_all,self.split_left,self.split_right
     
     # divide left or right branches into sub branches
     def _grow_branch(self,indices):
-        
-        self.prev_X=self.x
-        self.prev_Y=self.y
-        print(f"indices{indices} and x:{self.x}")
-        if  self.x.shape[1]==1:
-            print("it has ended")
-            return
-        self.x=self.prev_X[:,indices]
-        self.y=self.prev_Y[indices]
-        # print(self.x, self.y)
+        pass
         # new_threshold,new_index,self.best_gini_all=self.find_best_Gini_Threshold_all()
         # best_left,best_right=self.split_tree(new_index,new_threshold)
         # print(self.y[self.right_indices],self.y[self.left_indices])
         
-        
-    
-    
     def grow_tree(self):
-        self.find_best_Gini_Threshold_all()
-        best_left,best_right=self.split_tree(self.feature,self.best_threshold_all)
-        print(self.right_indices,self.left_indices)
-        self._grow_branch(self.left_indices)
-        if self.best_gini_all!=0:
-            DecisionTree(self.x,self.y)
-        self._grow_branch(self.right_indices)
+        leaf_gini=float("inf")
+        # if leaf_gini!=0:
+        best_threshold_all,feature,best_gini_all,left_node,right_node=self.find_best_Gini_Threshold_all()
+        print(self.right_indices)    
+       
+        
      
     
     def show_tree(self):
@@ -119,50 +105,12 @@ class DecisionTree:
         print(f" for ones for right: {self.l_1}")
         return self.l_0,self.l_1
                 
-        
-    
-class TreeNode:
-    def __init__(self, value):
-        self.value = value
-        self.left = None
-        self.right = None
-
-
-def build_tree(left_splits, right_splits, depth=0):
-    if depth >= len(left_splits):
-        return None
-    
-    node_value = left_splits[depth][0] if left_splits[depth] else None
-    node = TreeNode(node_value)
-    
-    if left_splits[depth]:
-        node.left = build_tree(left_splits, right_splits, depth + 1)
-    if right_splits[depth]:
-        node.right = build_tree(left_splits, right_splits, depth + 1)
-    
-    return node
-
-
-def print_tree(node, level=0, side='root'):
-    if node is not None:
-        print('  ' * level + f"{side}: {node.value}")
-        print_tree(node.left, level + 1, 'L')
-        print_tree(node.right, level + 1, 'R')
-
-     
-        
-        
-
-
-
-
 
 #creating object
 obj=DecisionTree(X,Y)
-obj._grow_branch()
-left_splits,right_splits=obj.show_tree()
+obj.grow_tree()
+# left_splits,right_splits=obj.show_tree()
+# for i in right_splits :
+#     print(f"leftsplits {i}")
 
 
-
-root = build_tree(left_splits, right_splits)
-print_tree(root)   
