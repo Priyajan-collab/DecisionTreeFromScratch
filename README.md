@@ -28,5 +28,31 @@ Run the above command in terminal inside the directory of DecisionTree.py
     - Now we have left and right sub tree , it is time to calulate gini index for this split, Basically we use the following formula
       - $Gini = (1 - \sum_{i=1}^{n} {\frac{n_i}{N}}^2)*p_i$
 
-          
+
+```mermaid
+
+graph TD
+    A[Start] --> B[Initialize DecisionTree with X and Y]
+    B --> C[Call fit method]
+    C --> D{All labels the same?}
+    D -->|Yes| E[Create leaf node with class label]
+    E --> F[Return leaf node]
+    D -->|No| G[Find best split]
+    G --> H[Calculate Gini impurity for each feature/threshold]
+   H --> I[Track best split lowest Gini]
+    I --> J{Valid split found?}
+    J -->|Yes| K[Split data into left/right subsets]
+    J -->|No| L[Create leaf node with majority class]
+    K --> M[Recursively grow left subtree]
+    M --> N[Recursively grow right subtree]
+    N --> O[Create decision node with feature/threshold]
+    O --> P[Return decision node]
+    P --> Q[Print tree structure]
+    Q --> R[End]
+    L --> R
+    F --> R
+```
+
+
+   
 
